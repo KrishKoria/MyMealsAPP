@@ -1,5 +1,7 @@
 package com.example.mymealsapp
+
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -22,41 +24,44 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun RecipeScreen(modifier: Modifier = Modifier){
+fun RecipeScreen(modifier: Modifier = Modifier, onNavigateToDetails: (Category) -> Unit){
     val recipeViewModel: MainViewModel = viewModel()
     val viewState by recipeViewModel.categoryState
-    Box(modifier = Modifier.fillMaxSize()){
-        when{
-            viewState.loading ->{
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            viewState.loading -> {
                 CircularProgressIndicator(modifier.align(Alignment.Center))
             }
 
-            viewState.error != null ->{
+            viewState.error != null -> {
                 Text("ERROR OCCURRED")
             }
-            else ->{
-                CategoryScreen(categories = viewState.list )
+
+            else -> {
+                CategoryScreen(categories = viewState.list, onNavigateToDetails = onNavigateToDetails)
             }
         }
     }
 }
 
 @Composable
-fun CategoryScreen(categories: List<Category>){
-    LazyVerticalGrid(GridCells.Fixed(2), modifier = Modifier.fillMaxSize()){
-        items(categories){
-                category ->
-            CategoryItem(category = category)
+fun CategoryScreen(categories: List<Category>, onNavigateToDetails: (Category) -> Unit) {
+    LazyVerticalGrid(GridCells.Fixed(2), modifier = Modifier.fillMaxSize()) {
+        items(categories) { category ->
+            CategoryItem(category = category, onNavigateToDetails)
         }
     }
 }
 
 @Composable
-fun CategoryItem(category: Category){
-    Column(modifier = Modifier
-        .padding(8.dp)
-        .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally)
+fun CategoryItem(category: Category, onNavigateToDetails: (Category) -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize()
+            .clickable { onNavigateToDetails(category) },
+        horizontalAlignment = Alignment.CenterHorizontally
+    )
     {
         Image(
             painter = rememberAsyncImagePainter(category.strCategoryThumb),
@@ -66,12 +71,11 @@ fun CategoryItem(category: Category){
                 .aspectRatio(1f)
         )
 
-
         Text(
             text = category.strCategory,
             color = Color.Black,
             style = TextStyle(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(top=4.dp)
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
